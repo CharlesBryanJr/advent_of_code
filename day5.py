@@ -1,3 +1,4 @@
+# pylint: disable=all
 '''
 --- Day 5: Print Queue ---
 Satisfied with their search on Ceres, the squadron of scholars suggests subsequently scanning the stationery stacks of sub-basement 17.
@@ -75,7 +76,7 @@ Of course, you'll need to be careful: the actual list of page ordering rules is 
 Determine which updates are already in the correct order. What do you get if you add up the middle page number from those correctly-ordered updates?
 '''
 
-            
+   
 if __name__ == "__main__":
     with open('day5_input.txt', 'r') as file:
         for line in file:

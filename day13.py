@@ -1,3 +1,5 @@
+# pylint: disable=all
+
 '''
 --- Day 13: Claw Contraption ---
 Next up: the lobby of a resort on a tropical island. The Historians take a moment to admire the hexagonal floor tiles before spreading out.
@@ -46,41 +48,135 @@ You estimate that each button would need to be pressed no more than 100 times to
 
 Figure out how to win as many prizes as possible. What is the fewest tokens you would have to spend to win all possible prizes?
 '''
+import re
+from math import gcd
 
 
-def find_the_total_distance(left, right):
-    sorted_left = sorted(left)
-    sorted_right = sorted(right)
-    total_distance = 0
-    for i in range(len(left)):
-        total_distance += abs(sorted_left[i] - sorted_right[i])
-    return total_distance
+def clean_input(data):
+    pattern = r'([A-Z]):?|(\d+)'
+    result = []
+    
+    for item in data:
+        # Find all matches of letters or numbers in the item
+        matches = re.findall(pattern, item)
+        
+        # Process each match
+        filtered_matches = []
+        for match in matches:
+            # If either letter or number exists, add it to filtered matches
+            if match[0] or match[1]:
+                selected_match = match[0] if match[0] else match[1]
+                filtered_matches.append(selected_match)
+        
+        # Extend the result list with filtered matches
+        result.extend(filtered_matches)
+    
+    #print(result)
+    return result
 
-def find_the_similarity(left, right):
-    sorted_left = sorted(left)
-    sorted_right = sorted(right)
-    similarity_score = 0
-    for left_num in sorted_left:
-        similarity_score += left_num * sorted_right.count(left_num)
-    return similarity_score
+
+def group_rows(arr):
+    multiple_game_input = []
+    single_game_input = []
+    counter = 0
+
+    for row in arr:
+        single_game_input.append(row)
+        counter += 1
+        if counter % 3 == 0:
+            multiple_game_input.append(single_game_input)
+            single_game_input = []
+
+    # If there are any leftover rows that didn't form a complete group of 3
+    if single_game_input:
+        multiple_game_input.append(single_game_input)
+
+    return multiple_game_input
+
+
+def parse_game_input(game_input):
+    x_units_to_move_options = []
+    x_units_to_move = None
+    y_units_to_move_options = []
+    y_units_to_move = None
+    for button in game_input:
+        if button[0] == 'P':
+            x_units_to_move = int(button[2])
+            y_units_to_move = int(button[4])
+        else:
+            x_units_to_move_options.append(int(button[2]))
+            y_units_to_move_options.append(int(button[4]))
+    
+    parsed_game_inputs = [[x_units_to_move, x_units_to_move_options], [y_units_to_move, y_units_to_move_options]]
+    return parsed_game_inputs
+
+
+def can_reach_target(target, options):
+    if len(options) != 2:
+        raise ValueError("This function expects exactly two options.")
+    n1, n2 = options
+
+    # Check gcd condition first
+    g = gcd(n1, n2)
+    if target % g != 0:
+        return None
+
+    # Try to find nonnegative a,b
+    for a in range(target // n1 + 1):
+        remainder = target - a * n1
+        if remainder >= 0 and remainder % n2 == 0:
+            b = remainder // n2
+            # We found a combination a,b that works
+            return (a, b)
+    return None
+
+
+def calculate_tokens(multiple_game_input, x_token_cost, y_token_cost, tokens_used):
+    for game_input in multiple_game_input:
+        print(f'game_input: {game_input}')
+        parsed_game_inputs = parse_game_input(game_input)
+        print(f'parsed_game_inputs: {parsed_game_inputs}')
+        
+        for parsed_game_input in parsed_game_inputs:
+            print(f'parsed_game_input: {parsed_game_input}')
+            target = parsed_game_input[0]
+            options = [option for option in parsed_game_input[1]]
+            multiples = can_reach_target(target, options)
+            print(f'multiples: {multiples}')
             
+            # Handle None safely
+            if multiples is None:
+                x_val = 0
+                y_val = 0
+            else:
+                x_val = multiples[0] if multiples[0] is not None else 0
+                y_val = multiples[1] if multiples[1] is not None else 0
+            
+            tokens_used += x_token_cost * x_val + y_token_cost * y_val
+        
+        print(f'tokens_used: {tokens_used}')
+    return tokens_used
+
+
 if __name__ == "__main__":
-    left, right = [], []
-    with open('day1_input.txt', 'r') as file:
-        is_left_list = True
+    with open('day13_input.txt', 'r') as file:
+        arr = []
         for line in file:
             words = line.split()
+            row = []
             for word in words:
-                if is_left_list:
-                    left.append(int(word.strip()))
-                    is_left_list = False
-                else:
-                    right.append(int(word.strip()))
-                    is_left_list = True
-            
-    print(f'the left list: {left}')
-    print(f'the right list: {right}')
-    print(f'the total distance between the left list and the right list: {find_the_total_distance(left, right)}')
-    print(f'the similarity score between the left list and the right list: {find_the_similarity(left, right)}')
+                if word != "Button":
+                    row.append(word)
 
+            cleaned_row = clean_input(row)
+            if cleaned_row != []:
+                arr.append(cleaned_row)
+            print('-'*13)
+            print('-'*13)
+            print('-'*13)
     
+    x_token_cost = 3
+    y_token_cost = 1
+    tokens_used = 0
+    multiple_game_input = group_rows(arr)
+    tokens_used = calculate_tokens(multiple_game_input, x_token_cost, y_token_cost, tokens_used)

@@ -1,3 +1,4 @@
+# pylint: disable=all
 '''
 --- Day 4: Ceres Search ---
 "Looks like the Chief's not here. Next!" One of The Historians pulls out a device and pushes the only button on it. After a brief flash, you recognize the interior of the Ceres monitoring station!
@@ -37,64 +38,64 @@ S.S.S.S.SS
 ..M.M.M.MM
 .X.X.XMASX
 Take a look at the little Elf's word search. How many times does XMAS appear?
+
+Part 1 Answer = 2483
 '''
 
+def count_occurrences(arr, word):
+    rows = len(arr)
+    cols = len(arr[0]) if rows > 0 else 0
+    word_length = len(word)
+    count = 0
 
-def get_chars_in_word(word):
-    return [char for char in word]
-
-def a(arr, chars_in_word):
-    for i in range(len(arr)):
-        for j in range(len(arr[i])):
-            current_char = arr[i][j]
-            if current_char in chars_in_word:
-                print(f'Found {arr[i][j]} at location i: {i}, j: {j}')
-                missing_neighbors = [char for char in chars_in_word if char != current_char]
-                print(f'missing_neighbors: {missing_neighbors}')
-                check_neighbors(arr, i, j, chars_in_word)
-    return None
-
-def check_neighbors(arr, i, j, missing_neighbors):
-    found_neighbors = []
-    neighbor_offsets = [
-        (-1, 0),  # Up
-        (1, 0),   # Down
-        (0, -1),  # Left
-        (0, 1)    # Right
+    # All 8 directions: up, down, left, right, and the four diagonals
+    directions = [
+       (-1, 0), (1, 0), (0, -1), (0, 1),
+       (-1, -1), (-1, 1), (1, -1), (1, 1)
     ]
+
+    print(f"Starting to search for '{word}' in a grid of {rows}x{cols}")
+   
+    for i in range(rows):
+        for j in range(cols):
+            if arr[i][j] == word[0]:
+                print()
+                print(f"Found starting letter '{word[0]}' at position ({i}, {j})")
+                # Check each direction from here
+                for dx, dy in directions:
+                    print(f"  Checking direction dx={dx}, dy={dy}")
+                    found = True
+                    x, y = i, j
+                    for k in range(word_length):
+                        # Check bounds and char match
+                        if 0 <= x < rows and 0 <= y < cols:
+                            print(f"    Checking character {k} ('{word[k]}') at position ({x}, {y}) -> found '{arr[x][y]}'")
+                            if arr[x][y] == word[k]:
+                                # Move to next character
+                                x += dx
+                                y += dy
+                            else:
+                                print(f"    Character mismatch: expected '{word[k]}', got '{arr[x][y]}'. Stopping.")
+                                found = False
+                                break
+                        else:
+                            print(f"    Out of bounds at character {k}. Stopping.")
+                            found = False
+                            break
+                        
+                    if found:
+                        print(f"  Found an occurrence of '{word}' starting at ({i}, {j}) in direction dx={dx}, dy={dy}")
+                        count += 1
     
-    for dx, dy in neighbor_offsets:
-        new_i, new_j = i + dx, j + dy
-        if (0 <= new_i < len(arr) and 0 <= new_j < len(arr[0])):
-            if arr[new_i][new_j] in missing_neighbors:
-                found_neighbors.append({
-                    'value': arr[new_i][new_j],
-                    'location': (new_i, new_j)
-                })
-                print(f'Found missing neighbor {arr[new_i][new_j]} at location i: {new_i}, j: {new_j}')
-    return found_neighbors
+    print(f"Total occurrences of '{word}': {count}")
+    return count
 
 if __name__ == "__main__":
-    new_row = []
     arr = []
     with open('day4_input.txt', 'r') as file:
         for line in file:
             line = line.strip()
-            #print(f'line: {line}')
-            
-            for char in line:
-                new_row.append(char)
-            #print(f'new_row: {new_row}')
-            
-            arr.append(new_row)
-            #print(f'arr: {arr}')
-            new_row = []
-    
-    print('-'*13)
-    print('-'*13)
-    print('-'*13)
-    x = 0
-    y = 0
-    word = 'xmas'
-    chars_in_word = get_chars_in_word(word.upper())
-    a(arr, chars_in_word)
+            arr.append(list(line))
+
+    word = 'XMAS'
+    occurrences = count_occurrences(arr, word)
