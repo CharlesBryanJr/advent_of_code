@@ -1,3 +1,5 @@
+# pylint: disable=all
+
 '''
 --- Day 3: Mull It Over ---
 "Our computers are having issues, so I have no idea if we have any Chief Historians in stock! You're welcome to check the warehouse, though," says the mildly flustered shopkeeper at the North Pole Toboggan Rental Shop. The Historians head out to take a look.
@@ -181,7 +183,7 @@ if __name__ == "__main__":
             words = line.split()
             #words = ["<#mul(645,89)", "mul(645,89)", "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))"]
             #words = ["xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))"]
-            words = ["xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"]
+            #words = ["xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"]
             for word in words:
                 print()
                 print(f'Processing word: {word}')

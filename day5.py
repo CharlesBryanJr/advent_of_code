@@ -76,14 +76,83 @@ Of course, you'll need to be careful: the actual list of page ordering rules is 
 Determine which updates are already in the correct order. What do you get if you add up the middle page number from those correctly-ordered updates?
 '''
 
-   
+import re
+
+def extract_and_convert_page_ordering_rule(value):
+    # Regex to match two numbers separated by '|'
+    match = re.match(r'(\d+)\|(\d+)', value)
+    if match:
+        # Convert both matched numbers to integers and return them as a tuple
+        num1 = int(match.group(1))
+        num2 = int(match.group(2))
+        return num1, num2
+    else:
+        return None  # Return None if the format is not matched
+
+
+def extract_and_convert_pages_to_produce(value):
+    # Regex to match multiple numbers separated by commas
+    match = re.match(r'(\d+),(\d+),(\d+),(\d+),(\d+)', value)
+    if match:
+        # Convert matched groups to integers and return them as a tuple
+        nums = [int(match.group(i)) for i in range(1, 6)]
+        return tuple(nums)
+    else:
+        return None  # Return None if the format is not matched
+
+
 if __name__ == "__main__":
     with open('day5_input.txt', 'r') as file:
+        pages_to_produce_in_each_update = False
+        page_ordering_rules = {}
+        for line in file:
+            words = line.split()
+            print('-'*13)
+            print('-'*13)
+            print('-'*13)
+            #print(words)
+            if words == []:
+                print("Found an empty bracket!")
+                print("Found an empty bracket!")
+                print("Found an empty bracket!")
+                print("Found an empty bracket!")
+                print("Found an empty bracket!")
+                pages_to_produce_in_each_update = True
+            
+            for word in words:
+                if pages_to_produce_in_each_update == True:
+                    pages_to_produce = extract_and_convert_pages_to_produce(word)
+                    if pages_to_produce:
+                        print(f"Extracted numbers: {pages_to_produce}")
+                    else:
+                        print("No match found.")
+                else:
+                    page_ordering_rule = extract_and_convert_page_ordering_rule(word)
+                    if page_ordering_rule:
+                        print(f"Extracted numbers: {page_ordering_rule[0]} and {page_ordering_rule[1]}")
+                        if page_ordering_rule[0] in page_ordering_rules:
+                            print(f"Extracted numbers: {page_ordering_rule[0]} and {page_ordering_rule[1]}")
+                    else:
+                        print("No match found.")
+
+
+
+'''
+if __name__ == "__main__":
+    with open('day5_input.txt', 'r') as file:
+        pages_to_produce_in_each_update = False
         for line in file:
             words = line.split()
             print('-'*13)
             print('-'*13)
             print('-'*13)
             print(words)
-            for word in words:
-                print(word)
+
+            if pages_to_produce_in_each_update == True:
+                for word in words:
+                    for char in word:
+                        print(f'char: {char}')
+
+            if words == []:
+                pages_to_produce_in_each_update = True
+'''
