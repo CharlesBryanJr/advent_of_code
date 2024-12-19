@@ -91,68 +91,205 @@ def extract_and_convert_page_ordering_rule(value):
 
 
 def extract_and_convert_pages_to_produce(value):
-    # Regex to match multiple numbers separated by commas
-    match = re.match(r'(\d+),(\d+),(\d+),(\d+),(\d+)', value)
+    # Regex to match one or more sets of comma-separated numbers
+    match = re.findall(r'\d+(?:,\d+)*', value)
+    
+    # If matches are found, process them
     if match:
-        # Convert matched groups to integers and return them as a tuple
-        nums = [int(match.group(i)) for i in range(1, 6)]
-        return tuple(nums)
+        result = []
+        for m in match:
+            # Split the matched string into integers and add as a list
+            nums = list(map(int, m.split(',')))
+        return nums
     else:
-        return None  # Return None if the format is not matched
+        print("return None  # Return None if no match is found")
+        return None
+    
+
+def find_middle_page_numbers(middle_page_number_array):
+    middle_pages = []
+    for pages in middle_page_number_array:
+        middle_index = len(pages) // 2  # Find the middle index
+        middle_pages.append(pages[middle_index])  # Get the middle page
+    return middle_pages
+
+
+def move_element(arr, from_index, to_index):
+    result = arr.copy()
+    element = result[from_index]
+    result.pop(from_index)
+    result.insert(to_index, element)
+    return result
+
+
+def difference_between_arrays(array1, array2):
+    # Convert inner lists to tuples for set operations
+    set1 = set(tuple(lst) for lst in array1)
+    set2 = set(tuple(lst) for lst in array2)
+    
+    # Find the difference
+    diff = set2 - set1
+    
+    # Convert tuples back to lists
+    return [list(t) for t in diff]
 
 
 if __name__ == "__main__":
     with open('day5_input.txt', 'r') as file:
         pages_to_produce_in_each_update = False
+        pages_to_produce_array = []
         page_ordering_rules = {}
         for line in file:
             words = line.split()
-            print('-'*13)
-            print('-'*13)
-            print('-'*13)
-            #print(words)
             if words == []:
-                print("Found an empty bracket!")
-                print("Found an empty bracket!")
-                print("Found an empty bracket!")
-                print("Found an empty bracket!")
-                print("Found an empty bracket!")
                 pages_to_produce_in_each_update = True
             
             for word in words:
                 if pages_to_produce_in_each_update == True:
                     pages_to_produce = extract_and_convert_pages_to_produce(word)
-                    if pages_to_produce:
-                        print(f"Extracted numbers: {pages_to_produce}")
-                    else:
-                        print("No match found.")
+                    pages_to_produce_array.append(pages_to_produce)
                 else:
                     page_ordering_rule = extract_and_convert_page_ordering_rule(word)
                     if page_ordering_rule:
-                        print(f"Extracted numbers: {page_ordering_rule[0]} and {page_ordering_rule[1]}")
                         if page_ordering_rule[0] in page_ordering_rules:
-                            print(f"Extracted numbers: {page_ordering_rule[0]} and {page_ordering_rule[1]}")
+                            page_ordering_rules[page_ordering_rule[0]].add(page_ordering_rule[1])
+                        else:
+                            page_ordering_rules[page_ordering_rule[0]] = {page_ordering_rule[1]}
+
+    
+    print('-'*13)
+    print('-'*13)
+    print('-'*13)
+    correctly_ordered_originally_middle_page_number_array = []
+    for pages_to_produce in pages_to_produce_array:
+        if pages_to_produce is not None:
+            correctly_ordered = True
+            for i in range(len(pages_to_produce)):
+                if pages_to_produce[i] in page_ordering_rules:
+                    j = i - 1
+                    lowest_index_to_swap_with = None
+                    while j >= 0:
+                        if pages_to_produce[j] in page_ordering_rules[pages_to_produce[i]]:
+                            print(pages_to_produce)
+                            print(f'{pages_to_produce[i]} - {page_ordering_rules[pages_to_produce[i]]}')
+                            print(f'found {pages_to_produce[j]} in set')
+                            correctly_ordered = False
+                            print()
+                        j -= 1
+            if correctly_ordered:
+                correctly_ordered_originally_middle_page_number_array.append(pages_to_produce)                
+        else:
+            print("pages_to_produce is None")
+    
+    print(f'correctly_ordered_originally_middle_page_number_array - {correctly_ordered_originally_middle_page_number_array}')
+    correctly_ordered_originally_middle_pages = find_middle_page_numbers(correctly_ordered_originally_middle_page_number_array)
+    print(f'correctly_ordered_originally_middle_pages - {correctly_ordered_originally_middle_pages}')
+    print(f'correctly_ordered_originally_middle_pages_sum = {sum(correctly_ordered_originally_middle_pages)}')
+
+
+    incorrectly_ordered_originally_middle_page_number_array = []
+    for pages_to_produce in pages_to_produce_array:
+        if pages_to_produce is not None:
+            i = 0
+            while i < len(pages_to_produce):
+                current_page = pages_to_produce[i]
+                correctly_ordered_originally = None
+                lowest_index_to_swap_with = None
+                if current_page in page_ordering_rules:
+                    j = i - 1
+                    while j >= 0:
+                        if pages_to_produce[j] in page_ordering_rules[current_page]:
+                            print(pages_to_produce)
+                            print(f'{current_page} - {page_ordering_rules[current_page]}')
+                            print(f'found {pages_to_produce[j]} in set')
+                            lowest_index_to_swap_with = j
+                            print(f'lowest_index_to_swap_with: {lowest_index_to_swap_with}')
+                            print()
+                        j -= 1
+
+                    if lowest_index_to_swap_with is not None:
+                        pages_to_produce = move_element(pages_to_produce, i, lowest_index_to_swap_with)
+                        print(f'updated_pages_to_produce - {pages_to_produce}')
+                        correctly_ordered_originally = False
                     else:
-                        print("No match found.")
+                        i += 1
+                else:
+                    i += 1
+
+            print('***')
+            if not correctly_ordered_originally:
+                print(f'updated_pages_to_produce - {pages_to_produce}')
+                incorrectly_ordered_originally_middle_page_number_array.append(pages_to_produce)
+        else:
+            print("pages_to_produce is None")
+
+    
+    print('---')
+    print('---')
+    print('---')
+    print(f'correctly_ordered_originally_middle_page_number_array - {correctly_ordered_originally_middle_page_number_array}')
+    correctly_ordered_originally_middle_pages = find_middle_page_numbers(correctly_ordered_originally_middle_page_number_array)
+    print(f'correctly_ordered_originally_middle_pages - {correctly_ordered_originally_middle_pages}')
+    print(f'correctly_ordered_originally_middle_pages_sum = {sum(correctly_ordered_originally_middle_pages)}')
+    print('---')
+    print('---')
+    print('---')
+    incorrectly_ordered_originally_middle_page_number_array = difference_between_arrays(correctly_ordered_originally_middle_page_number_array, incorrectly_ordered_originally_middle_page_number_array)
+    print(f'incorrectly_ordered_originally_middle_page_number_array - {incorrectly_ordered_originally_middle_page_number_array}')
+    incorrectly_ordered_originally_middle_pages = find_middle_page_numbers(incorrectly_ordered_originally_middle_page_number_array)
+    print(f'incorrectly_ordered_originally_middle_pages - {incorrectly_ordered_originally_middle_pages}')
+    print(f'incorrectly_ordered_originally_middle_pages_sum = {sum(incorrectly_ordered_originally_middle_pages)}')    
+
+
+    
+    
+
+
+
+
+
+
+
 
 
 
 '''
-if __name__ == "__main__":
-    with open('day5_input.txt', 'r') as file:
-        pages_to_produce_in_each_update = False
-        for line in file:
-            words = line.split()
-            print('-'*13)
-            print('-'*13)
-            print('-'*13)
-            print(words)
-
-            if pages_to_produce_in_each_update == True:
-                for word in words:
-                    for char in word:
-                        print(f'char: {char}')
-
-            if words == []:
-                pages_to_produce_in_each_update = True
+    print('-'*13)
+    print('-'*13)
+    print('-'*13)
+    middle_page_number_array = []
+    for pages_to_produce in pages_to_produce_array:
+        if pages_to_produce is not None:
+            correctly_ordered = True
+            for i in range(len(pages_to_produce)):
+                if pages_to_produce[i] in page_ordering_rules:
+                    j = i - 1
+                    lowest_index_to_swap_with = None
+                    while j >= 0:
+                        if pages_to_produce[j] in page_ordering_rules[pages_to_produce[i]]:
+                            print(pages_to_produce)
+                            print(f'{pages_to_produce[i]} - {page_ordering_rules[pages_to_produce[i]]}')
+                            print(f'found {pages_to_produce[j]} in set')
+                            lowest_index_to_swap_with = j
+                            print(f'lowest_index_to_swap_with: {lowest_index_to_swap_with}')
+                            correctly_ordered = False
+                            print()
+                        j -= 1
+                    if lowest_index_to_swap_with is not None:
+                        updated_pages_to_produce = move_element(pages_to_produce, i, lowest_index_to_swap_with)
+                        print(f'updated_pages_to_produce - {updated_pages_to_produce}')
+                    print('-')
+            if correctly_ordered:
+                middle_page_number_array.append(pages_to_produce)                
+        else:
+            print("pages_to_produce is None")
+    
+    print(f'middle_page_number_array - {middle_page_number_array}')
+    middle_pages = find_middle_page_numbers(middle_page_number_array)
+    print(f'middle_pages - {middle_pages}')
+    print(f'middle_pages_sum = {sum(middle_pages)}')
 '''
+
+
+
+
