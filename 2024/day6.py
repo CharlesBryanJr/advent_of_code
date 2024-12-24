@@ -113,26 +113,63 @@ def get_boundaries(arr):
     return boundaries
 
 
-def get_list_of_positions_from_a_position_to_the_boundary(arr, position, boundaries, direction):
-    list_of_positions_from_a_position_to_the_boundary = []
-    row_position = position[0]
-    col_position = position[1]
+def traverse_map(arr, position, boundaries, direction):
+    row_position, col_position  = position[0], position[1]
+
+    valid_positions = ['.', 'X']
     if direction.lower() == 'up':
         for i in reversed(range(row_position)):
-            print(arr[i][col_position])
+            if arr[i][col_position] not in valid_positions:
+                print(f'FOUND obstruction at {i, col_position} - turn right 90 degrees!')
+                last_visited_position = (i + 1, col_position)
+                print(f'last_visited_position: {last_visited_position}')
+                return (i, col_position)
+            else:
+                arr[i][col_position] = 'X'
     elif direction.lower() == 'down':
         for i in range(row_position + 1, boundaries['end_row'] + 1):
             print(arr[i][col_position])
+            if arr[i][col_position] not in valid_positions:
+                print(f'FOUND obstruction at {i, col_position} - turn right 90 degrees!')
+                return (i, col_position)
+            else:
+                arr[i][col_position] = 'X'
     elif direction.lower() == 'right':
         for i in range(col_position + 1, boundaries['end_col'] + 1):
             print(arr[row_position][i])
+            if arr[row_position][i] not in valid_positions:
+                print(f'FOUND obstruction at {row_position, i} - turn right 90 degrees!')
+                return (row_position, i)
+            else:
+                arr[row_position][i] = 'X'
     elif direction.lower() == 'left':
         for i in reversed(range(col_position)):
-            print(arr[row_position][i])
+            if arr[row_position][i] not in valid_positions:
+                print(f'FOUND obstruction at {row_position, i} - turn right 90 degrees!')
+                return (row_position, i)
+            else:
+                arr[row_position][i] = 'X'
     else:
          print(f'INVALID DIRECTION: {direction}')
-    
-    return list_of_positions_from_a_position_to_the_boundary
+
+    print(f'NO obstruction FOUND')
+    return None
+
+
+def get_new_direction(previous_direction):
+    direction_map = {
+        'up': 'right',
+        'right': 'down',
+        'down': 'left',
+        'left': 'up'
+    }
+    return direction_map.get(previous_direction)
+
+
+def get_new_position(position, new_direction):
+    if new_direction == 'right':
+        new_position = 0
+    return (0, 0)
 
 
 if __name__ == "__main__":
@@ -152,5 +189,17 @@ if __name__ == "__main__":
     boundaries = get_boundaries(arr)
     print(f'boundaries - {boundaries}')
     direction = 'up'
-    list_of_positions_from_a_position_to_the_boundary = get_list_of_positions_from_a_position_to_the_boundary(arr, position_of_char, boundaries, direction)
-    print(f'list_of_positions_from_a_position_to_the_boundary - {list_of_positions_from_a_position_to_the_boundary}')
+    FOUND_obstruction = traverse_map(arr, position_of_char, boundaries, direction)
+    if FOUND_obstruction:
+        print(f'FOUND_obstruction - {FOUND_obstruction}')
+        new_direction = get_new_direction(direction)
+        print(f'new_direction - {new_direction}')
+        print(f'get_new_position - {get_new_position(FOUND_obstruction, new_direction)}')
+        for row in arr:
+            print(''.join(row))
+        #traverse_map(arr, position_of_char, boundaries, new_direction)
+    else:
+        print(f'NO obstruction FOUND - {FOUND_obstruction}')
+        print(f'guard left the mapped area')
+    
+
