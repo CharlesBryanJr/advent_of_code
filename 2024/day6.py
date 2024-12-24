@@ -90,14 +90,67 @@ In this example, the guard will visit 41 distinct positions on your map.
 Predict the path of the guard. How many distinct positions will the guard visit before leaving the mapped area?
 '''
 
-            
+def get_position_of_char(arr, char):
+    for i in range(len(arr)):
+        for j in range(len(arr[i])):
+            if arr[i][j] == char:
+                return (i, j)
+    print(f'DID NOT FOUND CHAR: {char}')
+    return None
+
+
+def get_boundaries(arr):
+    rows = len(arr)
+    cols = len(arr[0]) if len(arr) > 0 else 0
+    start_row, start_col = 0, 0
+    end_row, end_col= rows - 1, cols - 1
+    boundaries = {
+        'start_row': start_row,
+        'start_col': start_col,
+        'end_row': end_row,
+        'end_col': end_col
+    }
+    return boundaries
+
+
+def get_list_of_positions_from_a_position_to_the_boundary(arr, position, boundaries, direction):
+    list_of_positions_from_a_position_to_the_boundary = []
+    row_position = position[0]
+    col_position = position[1]
+    if direction.lower() == 'up':
+        for i in reversed(range(row_position)):
+            print(arr[i][col_position])
+    elif direction.lower() == 'down':
+        for i in range(row_position + 1, boundaries['end_row'] + 1):
+            print(arr[i][col_position])
+    elif direction.lower() == 'right':
+        for i in range(col_position + 1, boundaries['end_col'] + 1):
+            print(arr[row_position][i])
+    elif direction.lower() == 'left':
+        for i in reversed(range(col_position)):
+            print(arr[row_position][i])
+    else:
+         print(f'INVALID DIRECTION: {direction}')
+    
+    return list_of_positions_from_a_position_to_the_boundary
+
+
 if __name__ == "__main__":
     with open('day6_input.txt', 'r') as file:
+        arr = []
         for line in file:
+            new_row = []
             words = line.split()
-            print('-'*13)
-            print('-'*13)
-            print('-'*13)
-            print(words)
             for word in words:
-                print(word)
+                for char in word:
+                    new_row.append(char)
+            arr.append(new_row)
+
+    char = '^'
+    position_of_char = get_position_of_char(arr, char)
+    print(f'position_of_char - {position_of_char}')
+    boundaries = get_boundaries(arr)
+    print(f'boundaries - {boundaries}')
+    direction = 'up'
+    list_of_positions_from_a_position_to_the_boundary = get_list_of_positions_from_a_position_to_the_boundary(arr, position_of_char, boundaries, direction)
+    print(f'list_of_positions_from_a_position_to_the_boundary - {list_of_positions_from_a_position_to_the_boundary}')
