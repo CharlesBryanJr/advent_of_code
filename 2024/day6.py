@@ -115,15 +115,20 @@ def get_boundaries(arr):
 
 def traverse_map(arr, position, boundaries, direction):
     row_position, col_position  = position[0], position[1]
+    valid_positions = ['.', 'X', '^']
+    if arr[row_position][col_position] in valid_positions:
+        arr[row_position][col_position] = 'X'
+    else:
+        print(f"INVALID POSITION at ({row_position}, {col_position})! Value: {arr[row_position][col_position]}")
 
-    valid_positions = ['.', 'X']
+    LAST_VISITED_POSITION = None
     if direction.lower() == 'up':
         for i in reversed(range(row_position)):
             if arr[i][col_position] not in valid_positions:
                 print(f'FOUND obstruction at {i, col_position} - turn right 90 degrees!')
-                last_visited_position = (i + 1, col_position)
-                print(f'last_visited_position: {last_visited_position}')
-                return (i, col_position)
+                LAST_VISITED_POSITION = (i + 1, col_position)
+                print(f'LAST_VISITED_POSITION: {LAST_VISITED_POSITION}')
+                return LAST_VISITED_POSITION
             else:
                 arr[i][col_position] = 'X'
     elif direction.lower() == 'down':
@@ -131,7 +136,9 @@ def traverse_map(arr, position, boundaries, direction):
             print(arr[i][col_position])
             if arr[i][col_position] not in valid_positions:
                 print(f'FOUND obstruction at {i, col_position} - turn right 90 degrees!')
-                return (i, col_position)
+                LAST_VISITED_POSITION = (i - 1, col_position)
+                print(f'LAST_VISITED_POSITION: {LAST_VISITED_POSITION}')
+                return LAST_VISITED_POSITION
             else:
                 arr[i][col_position] = 'X'
     elif direction.lower() == 'right':
@@ -139,21 +146,25 @@ def traverse_map(arr, position, boundaries, direction):
             print(arr[row_position][i])
             if arr[row_position][i] not in valid_positions:
                 print(f'FOUND obstruction at {row_position, i} - turn right 90 degrees!')
-                return (row_position, i)
+                LAST_VISITED_POSITION = (row_position, i - 1)
+                print(f'LAST_VISITED_POSITION: {LAST_VISITED_POSITION}')
+                return LAST_VISITED_POSITION
             else:
                 arr[row_position][i] = 'X'
     elif direction.lower() == 'left':
         for i in reversed(range(col_position)):
             if arr[row_position][i] not in valid_positions:
                 print(f'FOUND obstruction at {row_position, i} - turn right 90 degrees!')
-                return (row_position, i)
+                LAST_VISITED_POSITION = (row_position, i + 1)
+                print(f'LAST_VISITED_POSITION: {LAST_VISITED_POSITION}')
+                return LAST_VISITED_POSITION
             else:
                 arr[row_position][i] = 'X'
     else:
-         print(f'INVALID DIRECTION: {direction}')
+        print(f'INVALID DIRECTION: {direction}')
 
     print(f'NO obstruction FOUND')
-    return None
+    return LAST_VISITED_POSITION
 
 
 def get_new_direction(previous_direction):
@@ -167,9 +178,28 @@ def get_new_direction(previous_direction):
 
 
 def get_new_position(position, new_direction):
-    if new_direction == 'right':
-        new_position = 0
-    return (0, 0)
+    row, col = position
+    new_position = None
+
+    if new_direction == 'up':
+        new_position = (row - 1, col)
+    elif new_direction == 'down':
+        new_position = (row + 1, col)
+    elif new_direction == 'right':
+        new_position = (row, col + 1)
+    elif new_direction == 'left':
+        new_position = (row, col - 1)
+    else:
+        print(f"Invalid direction: {new_direction}")
+
+    return new_position
+
+
+def count_char_in_grid(grid, char):
+    char_count = 0
+    for row in grid:
+        char_count += row.count(char)
+    return char_count
 
 
 if __name__ == "__main__":
@@ -189,17 +219,31 @@ if __name__ == "__main__":
     boundaries = get_boundaries(arr)
     print(f'boundaries - {boundaries}')
     direction = 'up'
-    FOUND_obstruction = traverse_map(arr, position_of_char, boundaries, direction)
-    if FOUND_obstruction:
-        print(f'FOUND_obstruction - {FOUND_obstruction}')
-        new_direction = get_new_direction(direction)
-        print(f'new_direction - {new_direction}')
-        print(f'get_new_position - {get_new_position(FOUND_obstruction, new_direction)}')
-        for row in arr:
-            print(''.join(row))
-        #traverse_map(arr, position_of_char, boundaries, new_direction)
-    else:
-        print(f'NO obstruction FOUND - {FOUND_obstruction}')
-        print(f'guard left the mapped area')
+    LAST_VISITED_POSITION = True
+    while LAST_VISITED_POSITION is not None:
+        # Attempt to traverse the map in the current direction
+        LAST_VISITED_POSITION = traverse_map(arr, position_of_char, boundaries, direction)
+        if LAST_VISITED_POSITION:
+            print(f'LAST_VISITED_POSITION: {LAST_VISITED_POSITION}')
+            
+            # Turn right and get the new direction
+            direction = get_new_direction(direction)
+            print(f'new_direction: {direction}')
+            
+            # Update the guard's position based on the new direction
+            position_of_char = get_new_position(LAST_VISITED_POSITION, direction)
+            print(f'new_position: {position_of_char}')
+            
+            # Print the current state of the map
+            for row in arr:
+                print(''.join(row))
+        else:
+            # If no obstruction is found, the guard has left the mapped area
+            print(f'NO obstruction FOUND - {LAST_VISITED_POSITION}')
+            print(f'guard left the mapped area')
+            break
+    
+    char = 'X'
+    print(f'Char Count {char}: {count_char_in_grid(arr, char)}')
     
 
