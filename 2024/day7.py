@@ -19,6 +19,7 @@ For example:
 192: 17 8 14
 21037: 9 7 18 13
 292: 11 6 16 20
+
 Each line represents a single equation. The test value appears before the colon on each line; it is your job to determine whether the remaining numbers can be combined with operators to produce the test value.
 
 Operators are always evaluated left-to-right, not according to precedence rules. Furthermore, numbers in the equations cannot be rearranged. Glancing into the jungle, you can see elephants holding two different types of operators: add (+) and multiply (*).
@@ -33,16 +34,44 @@ The engineers just need the total calibration result, which is the sum of the te
 Determine which equations could possibly be true. What is their total calibration result?
 '''
 
-            
+import re
+
+def remove_non_numbers(s):
+    pattern = r'[^0-9]'
+    replacement = ''
+    return re.sub(pattern, replacement, s)
+
+
+def a(list_of_equations):
+    operators = ['+', '*']
+    for equation in list_of_equations:
+        arithmetic_result = equation[0]
+        print(f'arithmetic_result: {arithmetic_result}')
+        for i in range(len(equation)):
+            if i == 0:
+                continue
+            else:
+                operand = equation[i]
+                print(f'operand: {operand}')
+    return None
+
+
 if __name__ == "__main__":
+    list_of_equations = []
     with open('day7_input.txt', 'r') as file:
         for line in file:
+            new_row = []
             words = line.split()
             print('-'*13)
             print('-'*13)
             print('-'*13)
             print(words)
             for word in words:
-                print(word)
+                new_row.append(int(remove_non_numbers(word)))
+            list_of_equations.append(new_row)
+            print(list_of_equations)
+            break
+    
+    a(list_of_equations)
 
     
