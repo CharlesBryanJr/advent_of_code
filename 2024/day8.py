@@ -20,6 +20,7 @@ Scanning across the city, you find that there are actually many such antennas. E
 .........A..
 ............
 ............
+
 The signal only applies its nefarious effect at specific antinodes based on the resonant frequencies of the antennas. In particular, an antinode occurs at any point that is perfectly in line with two antennas of the same frequency - but only when one of the antennas is twice as far away as the other. This means that for any pair of antennas with the same frequency, there are two antinodes, one on either side of them.
 
 So, for these two antennas with frequency a, they create the two antinodes marked with #:
@@ -72,11 +73,14 @@ The first example has antennas with two different frequencies, so the antinodes 
 .........A..
 ..........#.
 ..........#.
+
 Because the topmost A-frequency antenna overlaps with a 0-frequency antinode, there are 14 total unique locations that contain an antinode within the bounds of the map.
 
 Calculate the impact of the signal. How many unique locations within the bounds of the map contain an antinode?
 '''
 
+# An antinode must be in a straight line with two matching antennas
+# One antenna must be twice as far from the antinode as the other antenna
 
 if __name__ == "__main__":
     with open('day8_input.txt', 'r') as file:
@@ -88,5 +92,6 @@ if __name__ == "__main__":
             print(words)
             for word in words:
                 print(word)
+            break
 
     

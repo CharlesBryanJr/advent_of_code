@@ -35,6 +35,8 @@ Determine which equations could possibly be true. What is their total calibratio
 '''
 
 import re
+import itertools
+
 
 def remove_non_numbers(s):
     pattern = r'[^0-9]'
@@ -42,22 +44,48 @@ def remove_non_numbers(s):
     return re.sub(pattern, replacement, s)
 
 
-def a(list_of_equations):
+def generate_combinations(n):
     operators = ['+', '*']
-    for equation in list_of_equations:
-        arithmetic_result = equation[0]
+    combinations = list(itertools.product(operators, repeat=n-1))
+    return combinations
+
+
+def evaluate_combinations(operators_list, numbers, target):
+    results = []
+    found_target = False
+    for operators in operators_list:
+        result = numbers[0]
+        for i, operator in enumerate(operators):
+            if operator == '+':
+                result += numbers[i + 1]  # Add the next number
+            elif operator == '*':
+                result *= numbers[i + 1]  # Multiply by the next number
+        if result == target:
+            found_target = True
+        results.append(result)
+    return results, found_target
+
+
+def evaluate_arithmetic_equations(list_of_equations):
+    total_calibration_result = 0
+    for arithmetic_result, operands in list_of_equations.items():
         print(f'arithmetic_result: {arithmetic_result}')
-        for i in range(len(equation)):
-            if i == 0:
-                continue
-            else:
-                operand = equation[i]
-                print(f'operand: {operand}')
-    return None
+        print(f'operands: {operands}')
+        operands_combinations = generate_combinations(len(operands))
+        print(f'operands_combinations: {operands_combinations}')
+        evaluated_combinations, found_target = evaluate_combinations(operands_combinations, operands, arithmetic_result)
+        print(f'evaluated_combinations: {evaluated_combinations}')
+        print(f'found_target: {found_target}')
+        if found_target:
+            total_calibration_result += arithmetic_result
+        print('-'*13)
+        print('-'*13)
+        print('-'*13)
+    return total_calibration_result
 
 
 if __name__ == "__main__":
-    list_of_equations = []
+    list_of_equations = {}
     with open('day7_input.txt', 'r') as file:
         for line in file:
             new_row = []
@@ -68,10 +96,14 @@ if __name__ == "__main__":
             print(words)
             for word in words:
                 new_row.append(int(remove_non_numbers(word)))
-            list_of_equations.append(new_row)
+            
+            arithmetic_result_index = 0
+            arithmetic_result = new_row.pop(arithmetic_result_index)
+            list_of_equations[arithmetic_result] = new_row
             print(list_of_equations)
-            break
-    
-    a(list_of_equations)
 
-    
+    print('-'*13)
+    print('-'*13)
+    print('-'*13)
+    total_calibration_result = evaluate_arithmetic_equations(list_of_equations)
+    print(f'total_calibration_result: {total_calibration_result}')

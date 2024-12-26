@@ -48,13 +48,91 @@ Continuing the first example, the first few blocks' position multiplied by its f
 Compact the amphipod's hard drive using the process he requested. What is the resulting filesystem checksum? (Be careful copy/pasting the input for this puzzle; it is a single, very long line.)
 '''
 
+
+# 2333133121414131402
+# [2, 3, 3, 3, 1, 3, 3, 1, 2, 1, 4, 1, 4, 1, 3, 1, 4, 0, 2]
+# 00...111...2...333.44.5555.6666.777.888899
+# 0099811188827773336446555566..............
+
+
+def get_disk_map_expanded_format(disk_map_dense_format):
+    disk_map_expanded_format = []
+    is_file_length = True
+    file_id_number = 0
+    
+    for i in range(len(disk_map_dense_format)):
+        if is_file_length:
+            file_length = int(disk_map_dense_format[i])  # Convert to integer
+            # Add file_id_number file_length times
+            disk_map_expanded_format.extend([file_id_number] * file_length)
+            #print(f'file_id_number: {file_id_number}')
+            #print(f'file_length: {file_length}')
+            file_id_number += 1
+            is_file_length = False
+        else:
+            free_space_length = int(disk_map_dense_format[i])  # Convert to integer
+            #print(f'free_space_length: {free_space_length}')
+            # Add '.' free_space_length times
+            disk_map_expanded_format.extend(['.'] * free_space_length)
+            is_file_length = True
+        #print(f'disk_map_expanded_format: {disk_map_expanded_format}')
+        #print()
+        
+    return disk_map_expanded_format
+
+
+def move_char_to_end_array(disk_map_expanded_format, char):
+    rearranged_disk_map_expanded_format = disk_map_expanded_format.copy()
+    l = 0
+    r = len(rearranged_disk_map_expanded_format) - 1
+    while l < r:
+        while rearranged_disk_map_expanded_format[l] != char:
+            l += 1
+        #print(f'l: {l}')
+        #print(f'{rearranged_disk_map_expanded_format[l]}')
+
+        while rearranged_disk_map_expanded_format[r] == char:
+            r -= 1
+        #print(f'r: {r}')
+        #print(f'{rearranged_disk_map_expanded_format[r]}')
+
+        rearranged_disk_map_expanded_format[l], rearranged_disk_map_expanded_format[r] = rearranged_disk_map_expanded_format[r], rearranged_disk_map_expanded_format[l]
+        l += 1
+        r -= 1
+
+    return rearranged_disk_map_expanded_format
+
+
+def calculate_filesystem_checksum(rearranged_disk_map_expanded_format):
+    filesystem_checksum = 0
+    for i in range(len(rearranged_disk_map_expanded_format)):
+        if not isinstance(rearranged_disk_map_expanded_format[i], int):
+            return filesystem_checksum
+        PRODUCT = i * rearranged_disk_map_expanded_format[i]
+        filesystem_checksum += PRODUCT
+        #print(f'PRODUCT: {PRODUCT}')
+        #print(f'filesystem_checksum: {filesystem_checksum}')
+    return filesystem_checksum
+
+
 if __name__ == "__main__":
+    disk_map_dense_format = []
     with open('day9_input.txt', 'r') as file:
         for line in file:
             words = line.split()
-            print('-'*13)
-            print('-'*13)
-            print('-'*13)
-            print(words)
             for word in words:
-                print(word)
+                for char in word:
+                    disk_map_dense_format.append(int(char))
+    print('-'*13)
+    print('-'*13)
+    print('-'*13)
+    print(f'disk_map_dense_format: {disk_map_dense_format}')
+    disk_map_expanded_format = get_disk_map_expanded_format(disk_map_dense_format)
+    print(f'disk_map_expanded_format: {disk_map_expanded_format}')
+    char = '.' 
+    rearranged_disk_map_expanded_format = move_char_to_end_array(disk_map_expanded_format, char)
+    print(f'rearranged_disk_map_expanded_format: {rearranged_disk_map_expanded_format}')
+    rearranged_disk_map_expanded_format_str = ''.join(str(x) for x in rearranged_disk_map_expanded_format if isinstance(x, (int, str)))
+    print(f'rearranged_disk_map_expanded_format_str: {rearranged_disk_map_expanded_format_str}')
+    filesystem_checksum = calculate_filesystem_checksum(rearranged_disk_map_expanded_format)
+    print(f'filesystem_checksum: {filesystem_checksum}')
